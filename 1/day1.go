@@ -25,7 +25,7 @@ func ReadInts(r io.Reader) (result []int, e error) {
 // brute force triple nested loop
 // optimize by sorting:
 // for two ints, n*logn (iterate + search for matching value)
-// for three ints,
+// for three ints...n^2 logn is straightforward. how to faster?
 func SumsTo2020ThreeBrute(expenses []int) (total int) {
 	found := false
 	var s, s2, s3 int
