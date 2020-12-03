@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"regexp"
-	"strconv"
 	"strings"
 )
 
@@ -17,16 +15,15 @@ type Pair struct {
 func ReadLines(r io.Reader) (counts []Pair, letters []string, pwds []string) {
 	scanner := bufio.NewScanner(r)
 	scanner.Split(bufio.ScanLines)
-	re, _ := regexp.Compile("([0-9]+)-([0-9]+) ([a-z]+): ([a-z]+$)")
 	i := 0
 	for scanner.Scan() {
-		line := scanner.Text()
-		matches := re.FindStringSubmatchIndex(line)
-		low, _ := strconv.Atoi(line[matches[2]:matches[3]])
-		high, _ := strconv.Atoi(line[matches[4]:matches[5]])
+		var low, high int
+		var letter rune
+		var pwd string
+		fmt.Sscanf(scanner.Text(), "%d-%d %c: %s", &low, &high, &letter, &pwd)
 		counts = append(counts, Pair{low, high})
-		letters = append(letters, line[matches[6]:matches[7]])
-		pwds = append(pwds, line[matches[8]:matches[9]])
+		letters = append(letters, string(letter))
+		pwds = append(pwds, pwd)
 		i++
 	}
 	return counts, letters, pwds
@@ -61,6 +58,9 @@ func countLegalPwds2(counts []Pair, letters []string, pwds []string) (count int)
 func main() {
 	r, _ := os.Open(os.Args[1])
 	counts, letters, pwds := ReadLines(r)
+	fmt.Printf("%v", counts)
+	fmt.Printf("%v", letters)
+	fmt.Printf("%v", pwds)
 	fmt.Println(countLegalPwds1(counts, letters, pwds))
 	fmt.Println(countLegalPwds2(counts, letters, pwds))
 }
