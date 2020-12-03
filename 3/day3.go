@@ -1,26 +1,23 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"io"
+	"io/ioutil"
 	"os"
+	"strings"
 )
 
 type Pair struct {
 	low, high int
 }
 
-func ReadLines(r io.Reader) (grid []string) {
-	scanner := bufio.NewScanner(r)
-	scanner.Split(bufio.ScanLines)
-	i := 0
-	for scanner.Scan() {
-		line := scanner.Text()
-		grid = append(grid, line)
-		i++
+func ReadLines(fileName string) (grid []string) {
+	fileBytes, err := ioutil.ReadFile(fileName)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
 	}
-	return grid
+	return strings.Split(string(fileBytes), "\n")
 }
 
 func getNumTrees(grid []string, horizJump, vertJump int) (count int) {
@@ -39,8 +36,7 @@ func getNumTrees(grid []string, horizJump, vertJump int) (count int) {
 }
 
 func main() {
-	r, _ := os.Open(os.Args[1])
-	grid := ReadLines(r)
+	grid := ReadLines(os.Args[1])
 	tot := getNumTrees(grid, 1, 1) *
 		getNumTrees(grid, 3, 1) *
 		getNumTrees(grid, 5, 1) *
