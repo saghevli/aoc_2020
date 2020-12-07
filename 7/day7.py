@@ -14,10 +14,8 @@ def recurseColorGold(color):
 def recurseSumGold(color):
   if not b[color][0]:
     return 1
-  sum = 1
-  for i in range(len(b[color][0])):
-    sum += recurseSumGold(b[color][0][i])*int(b[color][1][i])
-  return sum
+  return 1+sum(recurseSumGold(b[color][0][i])*int(b[color][1][i])
+    for i in range(len(b[color][0])))
 
 for l in open(sys.argv[1]).read().split("\n"):
   lA = l.split(" bags contain ")
