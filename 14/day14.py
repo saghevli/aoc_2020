@@ -1,49 +1,46 @@
-import sys, re, collections
+import sys, re, collections, itertools
 from copy import deepcopy
 
-
-def part1(data):
-  memory   = {}
-  and_mask = 0
-  or_mask  = 0
-  for d in data:
-      s   = d.split()
-      key = s[0][0:3]
-      if key == 'mem':
-          addr  = int(s[0][4:-1])
-          value = int(s[2])
-          memory[addr] = (value & ~and_mask) | or_mask
-          print("rightval: " + str((value & ~and_mask) | or_mask))
-          print(value)
-      if key == 'mas':
-          and_mask = int(deepcopy(s[2]).replace('1', 'X').replace('0', '1').replace('X', '0'), 2)
-          or_mask  = int(deepcopy(s[2]).replace('X', '0'), 2)
-          print("r" + deepcopy(s[2]).replace('1', 'X').replace('0', '1').replace('X', '0'))
-          print("r" + deepcopy(s[2]).replace('X', '0'))
-  return sum([memory[x] for x in memory])
+def f(p):
+  if p[0] == '0':
+    return p[1]
+  if p[0] == '1':
+    return '1'
+  if p[0] == 'X':
+    return 'X'
 
 
-maskstr = ""
 mem = collections.defaultdict(lambda : 0)
 mask, zeromask = 0, 0 
 for i, l in enumerate(open(sys.argv[1]).read().split("\n")):
   if l.startswith('mask'):
     r = re.match(r"mask = ([0-9A-Z]+)$", l)
     maskstr = r.group(1)
-    zeromask = int(deepcopy(maskstr).replace('1', 'X').replace('0', '1').replace('X', '0'))
-    # zeromask = int(deepcopy(maskstr).replace('1', '0').replace('X', '1'))
-    mask = int(deepcopy(maskstr).replace('X', '0'), 2)
-    print("w" +deepcopy(maskstr).replace('1', 'X').replace('0', '1').replace('X', '0'))
-    # print("w" +deepcopy(maskstr).replace('1', '0').replace('X', '1'))
-    print("w" +deepcopy(maskstr).replace('X', '0'))
+    zeromask = int(maskstr.replace('1', '0').replace('X', '1'), 2)
+    mask = int(maskstr.replace('X', '0'), 2)
   else:
     r = re.match(r"mem\[([0-9]+)\] = ([0-9]+)", l)
     w = (int(r.group(1)), int(r.group(2)))
-    # print(w[1] & zeromask | mask)
-    mem[w[0]] = (w[1] & ~zeromask) | mask
-    print("wrongval: " + str((w[1] & ~zeromask) | mask))
-    print(w[1])
+    mem[w[0]] = (w[1] & zeromask) | mask
 
-# print(mem)
-print(sum(v for v in mem.values()))
-print(part1(open(sys.argv[1]).read().split("\n")))
+print("part 1: " + str(sum(v for v in mem.values())))
+
+mem = collections.defaultdict(lambda : 0)
+zeromask = 0
+mask = ""
+for i, l in enumerate(open(sys.argv[1]).read().split("\n")):
+  if l.startswith('mask'):
+    r = re.match(r"mask = ([0-9A-Z]+)$", l)
+    mask = r.group(1)
+  else:
+    r = re.match(r"mem\[([0-9]+)\] = ([0-9]+)", l)
+    w = (int(r.group(1)), int(r.group(2)))
+    masks = []
+    for bs in list(itertools.product(range(2), repeat=mask.count('X'))):
+      newmask = "".join(list(f(p) for p in zip(mask, format(w[0], "036b"))))
+      for b in bs:
+        newmask = newmask.replace('X', str(b), 1)
+      masks.append(newmask)
+    for m in masks:
+      mem[m] = w[1]
+print("part 2: " + str(sum(v for v in mem.values())))
